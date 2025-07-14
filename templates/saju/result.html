@@ -1,60 +1,424 @@
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{#<html lang="ko">#}
+{#<head>#}
+{#  <meta charset="UTF-8">#}
+{#  <meta name="viewport" content="width=device-width,initial-scale=1.0">#}
+{#  <title>바르가 차트 해석</title>#}
+{#  <script src="https://cdn.tailwindcss.com"></script>#}
+{#</head>#}
+{#<body class="bg-indigo-900 text-white min-h-screen p-4 flex flex-col items-center">#}
+{#  <header class="w-full max-w-4xl text-center mb-8">#}
+{#    <h1 class="text-4xl font-bold text-yellow-400">⭐ 바르가 차트 해석</h1>#}
+{#    <p class="text-gray-300 mt-2">{{ name }}님의 차트 결과</p>#}
+{#  </header>#}
+{##}
+{#  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">#}
+{#    <h2 class="text-xl font-semibold text-gray-200 mb-4">출생 정보</h2>#}
+{#    <p>👤 이름: {{ name }}</p>#}
+{#    <p>📅 생년월일: {{ birth_date }}</p>#}
+{#    <p>⏰ 출생 시간: {{ birth_time }}</p>#}
+{#    <p>📍 출생지: {{ birth_place }}</p>#}
+{#  </section>#}
+{##}
+{#  <section class="w-full max-w-4xl mb-8">#}
+{#    <h2 class="text-2xl font-semibold text-gray-200 mb-4">주요 차트</h2>#}
+{#    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">#}
+{#      {% for chart in main_charts %}#}
+{#        <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">#}
+{#          <h3 class="text-lg font-semibold text-gray-100">{{ chart.title }}</h3>#}
+{#          <div class="flex-grow flex items-center justify-center bg-gray-600 rounded my-3 text-gray-400">차트 영역</div>#}
+{#          <p class="text-gray-400">{{ chart.description }}</p>#}
+{#        </div>#}
+{#      {% endfor %}#}
+{#    </div>#}
+{#  </section>#}
+{##}
+{#  <section class="w-full max-w-4xl mb-8">#}
+{#    <h3 class="text-xl font-semibold text-gray-200 mb-4">보조 차트</h3>#}
+{#    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">#}
+{#      {% for chart in aux_charts %}#}
+{#        <div class="bg-gray-800 p-4 rounded-lg shadow-md">#}
+{#          <h4 class="font-medium text-gray-100">{{ chart.title }}</h4>#}
+{#          <div class="h-32 bg-gray-600 rounded my-3 text-gray-400 flex items-center justify-center">차트 영역</div>#}
+{#          <p class="text-gray-400 text-sm">{{ chart.description }}</p>#}
+{#        </div>#}
+{#      {% endfor %}#}
+{#    </div>#}
+{#  </section>#}
+{##}
+{#  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">#}
+{#    <h2 class="text-xl font-semibold text-gray-200 mb-3 flex items-center">#}
+{#      <span class="text-yellow-400 mr-2">⭐</span> 오늘의 운세 및 통찰#}
+{#    </h2>#}
+{#    <p>{{ today_info.time }}: {{ today_info.description }}</p>#}
+{#    <p class="text-gray-400 mt-2">{{ today_info.advice }}</p>#}
+{#  </section>#}
+{##}
+{#  <a href="{% url 'saju:input' %}" class="w-full max-w-2xl py-3 bg-yellow-500 text-gray-900 font-bold rounded-xl text-center hover:bg-yellow-400 transition">새로 생성하기</a>#}
+{#</body>#}
+{#</html>#}
+{##}
+{##}
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{##}
+{#<html lang="ko">#}
+{#<head>#}
+{#  <meta charset="UTF-8">#}
+{#  <meta name="viewport" content="width=device-width,initial-scale=1.0">#}
+{#  <title>바르가 차트 해석</title>#}
+{#  <script src="https://cdn.tailwindcss.com"></script>#}
+{#  <style>#}
+{#    /* 바르가 차트의 기본 컨테이너 스타일 /#}
+{#    .chart-container {#}
+{#      position: relative;#}
+{#      width: 100%;#}
+{#      padding-bottom: 100%; / 1:1 비율 유지를 위해 높이를 너비와 동일하게 설정 /#}
+{#      overflow: hidden; / SVG가 컨테이너를 벗어나지 않도록 /#}
+{#      border: 2px solid #a0aec0; / 테두리 색상 조정 (gray-400) /#}
+{#      border-radius: 0.5rem; / rounded-lg에 맞춤 /#}
+{#    }#}
+{##}
+{#    / 차트 내부의 하우스(칸) 배치 /#}
+{#    .house {#}
+{#      position: absolute;#}
+{#      display: flex;#}
+{#      flex-direction: column;#}
+{#      justify-content: center;#}
+{#      align-items: center;#}
+{#      padding: 0.5rem; / 내부 여백 /#}
+{#      font-size: 0.75rem; / 글자 크기 조정 /#}
+{#      text-align: center;#}
+{#      color: #cbd5e0; / text-gray-300 /#}
+{#      overflow: hidden;#}
+{#      white-space: nowrap; / 내용이 한 줄로 표시되도록 /#}
+{#    }#}
+{##}
+{#    / 각 하우스의 위치 정의 (North Indian Style) /#}
+{#    / 중앙 다이아몬드 및 외곽 사각형의 각 모서리, 그리고 변의 중앙 /#}
+{#    / 이 위치는 대략적인 예시이며, 실제 배치는 정확한 계산이 필요할 수 있습니다. /#}
+{#    / 이 CSS는 기본적인 레이아웃을 제공하며, 실제 차트 데이터에 따른 정확한 배치는 JS로 동적으로 처리하는 것이 좋습니다. /#}
+{##}
+{#    / Top House (10th/1st based on rotation) /#}
+{#    #house-1 { top: 0; left: 25%; width: 50%; height: 25%; }#}
+{#    / Right Top (11th/2nd) /#}
+{#    #house-2 { top: 0; left: 75%; width: 25%; height: 25%; }#}
+{#    / Right Middle (12th/3rd) /#}
+{#    #house-3 { top: 25%; left: 75%; width: 25%; height: 50%; }#}
+{#    / Right Bottom (1st/4th) /#}
+{#    #house-4 { top: 75%; left: 75%; width: 25%; height: 25%; }#}
+{#    / Bottom House (2nd/5th) /#}
+{#    #house-5 { top: 75%; left: 25%; width: 50%; height: 25%; }#}
+{#    / Left Bottom (3rd/6th) /#}
+{#    #house-6 { top: 75%; left: 0; width: 25%; height: 25%; }#}
+{#    / Left Middle (4th/7th) /#}
+{#    #house-7 { top: 25%; left: 0; width: 25%; height: 50%; }#}
+{#    / Left Top (5th/8th) /#}
+{#    #house-8 { top: 0; left: 0; width: 25%; height: 25%; }#}
+{##}
+{#    / Central Houses (Inner Diamond) - 더 복잡한 배치 필요 /#}
+{#    / 이 예시에서는 중앙 4개의 하우스를 단순화합니다. 실제로는 회전된 사각형 내부에 위치합니다. /#}
+{#    #house-9 { top: 25%; left: 25%; width: 25%; height: 25%; } / 중앙 상단 좌측 /#}
+{#    #house-10 { top: 25%; left: 50%; width: 25%; height: 25%; } / 중앙 상단 우측 /#}
+{#    #house-11 { top: 50%; left: 25%; width: 25%; height: 25%; } / 중앙 하단 좌측 /#}
+{#    #house-12 { top: 50%; left: 50%; width: 25%; height: 25%; } / 중앙 하단 우측 /#}
+{##}
+{#    / 내부 콘텐츠 정렬 */#}
+{#    .house-content {#}
+{#      width: 100%;#}
+{#      height: 100%;#}
+{#      display: flex;#}
+{#      flex-direction: column;#}
+{#      justify-content: center;#}
+{#      align-items: center;#}
+{#    }#}
+{#  </style>#}
+{#</head>#}
+{#<body class="bg-indigo-900 text-white min-h-screen p-4 flex flex-col items-center">#}
+{#  <header class="w-full max-w-4xl text-center mb-8">#}
+{#    <h1 class="text-4xl font-bold text-yellow-400">⭐ 바르가 차트 해석</h1>#}
+{#    <p class="text-gray-300 mt-2">{{ name }}님의 차트 결과</p>#}
+{#  </header>#}
+{##}
+{#  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">#}
+{#    <h2 class="text-xl font-semibold text-gray-200 mb-4">출생 정보</h2>#}
+{#    <p>👤 이름: {{ name }}</p>#}
+{#    <p>📅 생년월일: {{ birth_date }}</p>#}
+{#    <p>⏰ 출생 시간: {{ birth_time }}</p>#}
+{#    <p>📍 출생지: {{ birth_place }}</p>#}
+{#  </section>#}
+{##}
+{#  <section class="w-full max-w-4xl mb-8">#}
+{#    <h2 class="text-2xl font-semibold text-gray-200 mb-4">주요 차트</h2>#}
+{#    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">#}
+{#      {% for chart in main_charts %}#}
+{#        <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">#}
+{#          <h3 class="text-lg font-semibold text-gray-100 mb-2">{{ chart.title }}</h3>#}
+{#          <div class="flex flex-col items-center justify-center flex-grow">#}
+{#            <div class="chart-container w-full max-w-xs aspect-square mx-auto">#}
+{#              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; top: 0; left: 0; z-index: 0;">#}
+{#                <path d="M 0 0 L 100 100 M 100 0 L 0 100 M 50 0 L 100 50 L 50 100 L 0 50 Z" stroke="#81E6D9" stroke-width="0.7" fill="none"/>#}
+{#              </svg>#}
+{#              <div id="house-1" class="house"><div class="house-content">1H</div></div>#}
+{#              <div id="house-2" class="house"><div class="house-content">2H</div></div>#}
+{#              <div id="house-3" class="house"><div class="house-content">3H</div></div>#}
+{#              <div id="house-4" class="house"><div class="house-content">4H</div></div>#}
+{#              <div id="house-5" class="house"><div class="house-content">5H</div></div>#}
+{#              <div id="house-6" class="house"><div class="house-content">6H</div></div>#}
+{#              <div id="house-7" class="house"><div class="house-content">7H</div></div>#}
+{#              <div id="house-8" class="house"><div class="house-content">8H</div></div>#}
+{#              <div id="house-9" class="house"><div class="house-content">9H</div></div>#}
+{#              <div id="house-10" class="house"><div class="house-content">10H</div></div>#}
+{#              <div id="house-11" class="house"><div class="house-content">11H</div></div>#}
+{#              <div id="house-12" class="house"><div class="house-content">12H</div></div>#}
+{#            </div>#}
+{#          </div>#}
+{#          <p class="text-gray-400 mt-3">{{ chart.description }}</p>#}
+{#        </div>#}
+{#      {% endfor %}#}
+{#    </div>#}
+{#  </section>#}
+{##}
+{#  <section class="w-full max-w-4xl mb-8">#}
+{#    <h3 class="text-xl font-semibold text-gray-200 mb-4">보조 차트</h3>#}
+{#    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">#}
+{#      {% for chart in aux_charts %}#}
+{#        <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">#}
+{#          <h4 class="font-medium text-gray-100 mb-2">{{ chart.title }}</h4>#}
+{#          <div class="flex flex-col items-center justify-center flex-grow">#}
+{#            <div class="chart-container w-full max-w-[120px] aspect-square mx-auto">#}
+{#              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; top: 0; left: 0; z-index: 0;">#}
+{#                <path d="M 0 0 L 100 100 M 100 0 L 0 100 M 50 0 L 100 50 L 50 100 L 0 50 Z" stroke="#81E6D9" stroke-width="0.7" fill="none"/>#}
+{#              </svg>#}
+{#              <div id="house-1" class="house"><div class="house-content">1H</div></div>#}
+{#              <div id="house-2" class="house"><div class="house-content">2H</div></div>#}
+{#              <div id="house-3" class="house"><div class="house-content">3H</div></div>#}
+{#              <div id="house-4" class="house"><div class="house-content">4H</div></div>#}
+{#              <div id="house-5" class="house"><div class="house-content">5H</div></div>#}
+{#              <div id="house-6" class="house"><div class="house-content">6H</div></div>#}
+{#              <div id="house-7" class="house"><div class="house-content">7H</div></div>#}
+{#              <div id="house-8" class="house"><div class="house-content">8H</div></div>#}
+{#              <div id="house-9" class="house"><div class="house-content">9H</div></div>#}
+{#              <div id="house-10" class="house"><div class="house-content">10H</div></div>#}
+{#              <div id="house-11" class="house"><div class="house-content">11H</div></div>#}
+{#              <div id="house-12" class="house"><div class="house-content">12H</div></div>#}
+{#            </div>#}
+{#          </div>#}
+{#          <p class="text-gray-400 text-sm mt-3">{{ chart.description }}</p>#}
+{#        </div>#}
+{#      {% endfor %}#}
+{#    </div>#}
+{#  </section>#}
+{##}
+{#  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">#}
+{#    <h2 class="text-xl font-semibold text-gray-200 mb-3 flex items-center">#}
+{#      <span class="text-yellow-400 mr-2">⭐</span> 오늘의 운세 및 통찰#}
+{#    </h2>#}
+{#    <p>{{ today_info.time }}: {{ today_info.description }}</p>#}
+{#    <p class="text-gray-400 mt-2">{{ today_info.advice }}</p>#}
+{#  </section>#}
+{##}
+{#  <a href="{% url 'saju:input' %}" class="w-full max-w-2xl py-3 bg-yellow-500 text-gray-900 font-bold rounded-xl text-center hover:bg-yellow-400 transition">새로 생성하기</a>#}
+{#</body>#}
+{#</html>#}
+{##}
+
 {% load static %}
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>바르가 차트 해석</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>바르가 차트 해석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chart-container {
+          position: relative;
+          width: 100%;
+          padding-bottom: 100%;
+          overflow: hidden;
+          border: 2px solid #a0aec0;
+          border-radius: 0.5rem;
+        }
+
+        .house {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 0.5rem;
+          font-size: 0.75rem;
+          text-align: center;
+          color: #cbd5e0;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        #house-1 { top: 0; left: 25%; width: 50%; height: 25%; }
+        #house-2 { top: 0; left: 75%; width: 25%; height: 25%; }
+        #house-3 { top: 25%; left: 75%; width: 25%; height: 50%; }
+        #house-4 { top: 75%; left: 75%; width: 25%; height: 25%; }
+        #house-5 { top: 75%; left: 25%; width: 50%; height: 25%; }
+        #house-6 { top: 75%; left: 0; width: 25%; height: 25%; }
+        #house-7 { top: 25%; left: 0; width: 25%; height: 50%; }
+        #house-8 { top: 0; left: 0; width: 25%; height: 25%; }
+
+        #house-9 { top: 25%; left: 25%; width: 25%; height: 25%; }
+        #house-10 { top: 25%; left: 50%; width: 25%; height: 25%; }
+        #house-11 { top: 50%; left: 25%; width: 25%; height: 25%; }
+        #house-12 { top: 50%; left: 50%; width: 25%; height: 25%; }
+
+        .house-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body class="bg-indigo-900 text-white min-h-screen p-4 flex flex-col items-center">
-  <header class="w-full max-w-4xl text-center mb-8">
+<header class="w-full max-w-4xl text-center mb-8">
     <h1 class="text-4xl font-bold text-yellow-400">⭐ 바르가 차트 해석</h1>
     <p class="text-gray-300 mt-2">{{ name }}님의 차트 결과</p>
-  </header>
+</header>
 
-  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
+<section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
     <h2 class="text-xl font-semibold text-gray-200 mb-4">출생 정보</h2>
     <p>👤 이름: {{ name }}</p>
     <p>📅 생년월일: {{ birth_date }}</p>
     <p>⏰ 출생 시간: {{ birth_time }}</p>
     <p>📍 출생지: {{ birth_place }}</p>
-  </section>
+</section>
 
-  <section class="w-full max-w-4xl mb-8">
+<section class="w-full max-w-4xl mb-8">
     <h2 class="text-2xl font-semibold text-gray-200 mb-4">주요 차트</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for chart in main_charts %}
-        <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">
-          <h3 class="text-lg font-semibold text-gray-100">{{ chart.title }}</h3>
-          <div class="flex-grow flex items-center justify-center bg-gray-600 rounded my-3 text-gray-400">차트 영역</div>
-          <p class="text-gray-400">{{ chart.description }}</p>
-        </div>
-      {% endfor %}
+        {% for chart in main_charts %}
+            <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-100 mb-2">{{ chart.title }}</h3>
+                <div class="flex flex-col items-center justify-center flex-grow">
+                    <div class="chart-container w-full max-w-xs aspect-square mx-auto">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"
+                             style="position: absolute; top: 0; left: 0; z-index: 0;">
+                            <path d="M 0 0 L 100 100 M 100 0 L 0 100 M 50 0 L 100 50 L 50 100 L 0 50 Z" stroke="#81E6D9"
+                                  stroke-width="0.7" fill="none"/>
+                        </svg>
+                        <div id="house-1" class="house">
+                            <div class="house-content">1H</div>
+                        </div>
+                        <div id="house-2" class="house">
+                            <div class="house-content">2H</div>
+                        </div>
+                        <div id="house-3" class="house">
+                            <div class="house-content">3H</div>
+                        </div>
+                        <div id="house-4" class="house">
+                            <div class="house-content">4H</div>
+                        </div>
+                        <div id="house-5" class="house">
+                            <div class="house-content">5H</div>
+                        </div>
+                        <div id="house-6" class="house">
+                            <div class="house-content">6H</div>
+                        </div>
+                        <div id="house-7" class="house">
+                            <div class="house-content">7H</div>
+                        </div>
+                        <div id="house-8" class="house">
+                            <div class="house-content">8H</div>
+                        </div>
+                        <div id="house-9" class="house">
+                            <div class="house-content">9H</div>
+                        </div>
+                        <div id="house-10" class="house">
+                            <div class="house-content">10H</div>
+                        </div>
+                        <div id="house-11" class="house">
+                            <div class="house-content">11H</div>
+                        </div>
+                        <div id="house-12" class="house">
+                            <div class="house-content">12H</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-400 mt-3">{{ chart.description }}</p>
+            </div>
+        {% endfor %}
     </div>
-  </section>
+</section>
 
-  <section class="w-full max-w-4xl mb-8">
+<section class="w-full max-w-4xl mb-8">
     <h3 class="text-xl font-semibold text-gray-200 mb-4">보조 차트</h3>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {% for chart in aux_charts %}
-        <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-          <h4 class="font-medium text-gray-100">{{ chart.title }}</h4>
-          <div class="h-32 bg-gray-600 rounded my-3 text-gray-400 flex items-center justify-center">차트 영역</div>
-          <p class="text-gray-400 text-sm">{{ chart.description }}</p>
-        </div>
-      {% endfor %}
+        {% for chart in aux_charts %}
+            <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">
+                <h4 class="font-medium text-gray-100 mb-2">{{ chart.title }}</h4>
+                <div class="flex flex-col items-center justify-center flex-grow">
+                    <div class="chart-container w-full max-w-[120px] aspect-square mx-auto">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"
+                             style="position: absolute; top: 0; left: 0; z-index: 0;">
+                            <path d="M 0 0 L 100 100 M 100 0 L 0 100 M 50 0 L 100 50 L 50 100 L 0 50 Z" stroke="#81E6D9"
+                                  stroke-width="0.7" fill="none"/>
+                        </svg>
+                        <div id="house-1" class="house">
+                            <div class="house-content">1H</div>
+                        </div>
+                        <div id="house-2" class="house">
+                            <div class="house-content">2H</div>
+                        </div>
+                        <div id="house-3" class="house">
+                            <div class="house-content">3H</div>
+                        </div>
+                        <div id="house-4" class="house">
+                            <div class="house-content">4H</div>
+                        </div>
+                        <div id="house-5" class="house">
+                            <div class="house-content">5H</div>
+                        </div>
+                        <div id="house-6" class="house">
+                            <div class="house-content">6H</div>
+                        </div>
+                        <div id="house-7" class="house">
+                            <div class="house-content">7H</div>
+                        </div>
+                        <div id="house-8" class="house">
+                            <div class="house-content">8H</div>
+                        </div>
+                        <div id="house-9" class="house">
+                            <div class="house-content">9H</div>
+                        </div>
+                        <div id="house-10" class="house">
+                            <div class="house-content">10H</div>
+                        </div>
+                        <div id="house-11" class="house">
+                            <div class="house-content">11H</div>
+                        </div>
+                        <div id="house-12" class="house">
+                            <div class="house-content">12H</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-400 text-sm mt-3">{{ chart.description }}</p>
+            </div>
+        {% endfor %}
     </div>
-  </section>
+</section>
 
-  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
+<section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
     <h2 class="text-xl font-semibold text-gray-200 mb-3 flex items-center">
-      <span class="text-yellow-400 mr-2">⭐</span> 오늘의 운세 및 통찰
+        <span class="text-yellow-400 mr-2">⭐</span> 오늘의 운세 및 통찰
     </h2>
     <p>{{ today_info.time }}: {{ today_info.description }}</p>
     <p class="text-gray-400 mt-2">{{ today_info.advice }}</p>
-  </section>
+</section>
 
-  <a href="{% url 'saju:input' %}" class="w-full max-w-2xl py-3 bg-yellow-500 text-gray-900 font-bold rounded-xl text-center hover:bg-yellow-400 transition">새로 생성하기</a>
+<a href="{% url 'saju:input' %}"
+   class="w-full max-w-2xl py-3 bg-yellow-500 text-gray-900 font-bold rounded-xl text-center hover:bg-yellow-400 transition">새로
+    생성하기</a>
 </body>
 </html>

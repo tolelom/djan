@@ -1,0 +1,415 @@
+{#    <div id="detail-page" class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-4xl hidden-section">#}
+{#        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-700">#}
+{#            <div class="flex items-center">#}
+{#                <h2 id="detail-chart-title" class="text-2xl font-bold text-gray-100"></h2>#}
+{#            </div>#}
+{#            <button class="bg-yellow-500 text-gray-900 font-bold py-2 px-4 rounded-full text-sm hover:bg-yellow-400 transition duration-300" onclick="goToChartPageFromDetail()">#}
+{#                <span class="mr-1">AI 해석</span>#}
+{#            </button>#}
+{#        </header>#}
+{##}
+{#        <p id="detail-intro-text" class="text-gray-300 mb-8"></p>#}
+{##}
+{#        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">#}
+{#            <!-- Left Column: Varga Chart Visualization -->#}
+{#            <div>#}
+{#                <h3 class="text-xl font-semibold mb-4 text-gray-200">차트 시각화</h3>#}
+{#                <p class="text-gray-400 text-sm mb-4">(실제 구면사 차트 다이어그램)</p>#}
+{#                <div class="bg-gray-700 p-6 rounded-xl shadow-inner flex items-center justify-center h-64">#}
+{#                    <!-- Placeholder for the actual chart diagram -->#}
+{#                    <img id="detail-chart-image" src="https://placehold.co/300x200/555/FFF?text=Chart" alt="Chart Placeholder" class="w-full h-full object-contain rounded-md" onerror="this.onerror=null;this.src='https://placehold.co/300x200/555/FFF?text=Error';" />#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Right Column: Chart Core Information -->#}
+{#            <div>#}
+{#                <h3 class="text-xl font-semibold mb-4 text-gray-200">차트 핵심 정보</h3>#}
+{#                <div id="core-info-container" class="bg-gray-700 p-6 rounded-xl shadow-inner space-y-3">#}
+{#                    <p class="flex items-center text-gray-300"><span class="text-green-400 mr-2">✔</span> 라그나: <span id="lagna-info"></span></p>#}
+{#                    <p class="flex items-center text-gray-300"><span class="text-green-400 mr-2">✔</span> 7하우스 지배자: <span id="house7-info"></span></p>#}
+{#                    <p class="flex items-center text-gray-300"><span class="text-green-400 mr-2">✔</span> 금성 위치: <span id="venus-info"></span></p>#}
+{#                </div>#}
+{##}
+{#                <h3 class="text-xl font-semibold mt-6 mb-4 text-gray-200">결혼 생활의 강점</h3>#}
+{#                <div id="strengths-container-detail" class="bg-gray-700 p-6 rounded-xl shadow-inner space-y-3">#}
+{#                    <!-- Strengths will be injected here by JS -->#}
+{#                </div>#}
+{##}
+{#                <h3 class="text-xl font-semibold mt-6 mb-4 text-gray-200">주의해야 할 점</h3>#}
+{#                <div id="warnings-container-detail" class="bg-gray-700 p-6 rounded-xl shadow-inner space-y-3">#}
+{#                    <!-- Warnings will be injected here by JS -->#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <!-- AI Custom Analysis Section -->#}
+{#        <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8">#}
+{#            <h2 class="text-xl font-semibold mb-4 text-gray-200 flex items-center">#}
+{#                <span class="mr-3 text-yellow-400">⭐</span> AI 맞춤 해석#}
+{#                <span class="ml-auto bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-full">분석 신뢰도: 85%</span>#}
+{#            </h2>#}
+{#            <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">#}
+{#                <span class="mr-2">❤️</span> 결혼과 배우자 운명#}
+{#            </h3>#}
+{#            <p id="ai-analysis-intro" class="text-gray-300 mb-4"></p>#}
+{##}
+{#            <div id="ai-analysis-content" class="space-y-6 text-gray-300">#}
+{#                <!-- AI analysis details will be injected here by JS -->#}
+{#            </div>#}
+{#        </section>#}
+{##}
+{#        <!-- Back to Chart List Button -->#}
+{#        <button#}
+{#            id="back-to-chart-list-btn"#}
+{#            class="w-full py-4 bg-yellow-500 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition duration-300 ease-in-out transform hover:scale-105"#}
+{#            onclick="goToChartPageFromDetail()"#}
+{#        >#}
+{#            차트 목록으로 돌아가기#}
+{#        </button>#}
+{#    </div>#}
+{##}
+{#    <script>#}
+{#        // DOM elements#}
+{#        const inputPage = document.getElementById('input-page');#}
+{#        const chartPage = document.getElementById('chart-page');#}
+{#        const detailPage = document.getElementById('detail-page');#}
+{#        const generateChartBtn = document.getElementById('generate-chart-btn');#}
+{#        const newChartBtn = document.getElementById('new-chart-btn');#}
+{#        const loadingSpinner = document.getElementById('loading-spinner');#}
+{#        const chartContent = document.getElementById('chart-content');#}
+{##}
+{#        // Input fields#}
+{#        const nameInput = document.getElementById('name');#}
+{#        const birthDateInput = document.getElementById('birthDate');#}
+{#        const birthTimeInput = document.getElementById('birthTime');#}
+{#        const birthPlaceInput = document.getElementById('birthPlace');#}
+{##}
+{#        // Summary elements on chart page#}
+{#        const userNameDisplay = document.getElementById('user-name-display');#}
+{#        const userInitialDisplay = document.getElementById('user-initial-display');#}
+{#        const summaryName = document.getElementById('summary-name');#}
+{#        const summaryBirthDate = document.getElementById('summary-birthDate');#}
+{#        const summaryBirthTime = document.getElementById('summary-birthTime');#}
+{#        const summaryBirthPlace = document.getElementById('summary-birthPlace');#}
+{##}
+{#        // Chart containers#}
+{#        const mainChartsContainer = document.getElementById('main-charts-container');#}
+{#        const auxiliaryChartsContainer = document.getElementById('auxiliary-charts-container');#}
+{##}
+{#        // Today's info elements#}
+{#        const todayInfoTime = document.getElementById('today-info-time');#}
+{#        const todayInfoDescription = document.getElementById('today-info-description');#}
+{#        const todayInfoAdvice = document.getElementById('today-info-advice');#}
+{##}
+{#        // Detail page elements#}
+{#        const detailChartTitle = document.getElementById('detail-chart-title');#}
+{#        const detailIntroText = document.getElementById('detail-intro-text');#}
+{#        const detailChartImage = document.getElementById('detail-chart-image'); // New ID for chart image#}
+{#        const coreInfoContainer = document.getElementById('core-info-container'); // Container for core info#}
+{#        const lagnaInfo = document.getElementById('lagna-info');#}
+{#        const house7Info = document.getElementById('house7-info');#}
+{#        const venusInfo = document.getElementById('venus-info');#}
+{##}
+{#        // Strengths and Warnings containers#}
+{#        const strengthsContainerDetail = document.getElementById('strengths-container-detail');#}
+{#        const warningsContainerDetail = document.getElementById('warnings-container-detail');#}
+{##}
+{#        // AI Analysis content container#}
+{#        const aiAnalysisIntro = document.getElementById('ai-analysis-intro'); // New ID for AI intro text#}
+{#        const aiAnalysisContent = document.getElementById('ai-analysis-content');#}
+{##}
+{##}
+{#        // Global variable to store user info#}
+{#        let userInfo = {};#}
+{##}
+{#        // Chart data (JSON equivalent of React's state)#}
+{#        const chartData = {#}
+{#            mainCharts: [#}
+{#                { id: 'D1', title: 'D1 - 라시 차트', description: '기본 출생 차트 - 전반적인 성격과 운명' },#}
+{#                { id: 'D9', title: 'D9 - 나밤사 차트', description: '결혼과 배우자 - 결혼 생활과 파트너십' },#}
+{#                { id: 'D10', title: 'D10 - 다상사 차트', description: '직업과 경력 - 사회적 지위와 성취' },#}
+{#            ],#}
+{#            auxiliaryCharts: [#}
+{#                { id: 'D2', title: 'D2 - 호라', description: '재산과 부' },#}
+{#                { id: 'D3', title: 'D3 - 드레카나', description: '형제자매' },#}
+{#                { id: 'D7', title: 'D7 - 삽탐사', description: '자녀와 후손' },#}
+{#                { id: 'D12', title: 'D12 - 드와다사', description: '부모와 조상' },#}
+{#            ],#}
+{#            todayInfo: {#}
+{#                time: '현재 다샤 시간',#}
+{#                description: '금성 마하디샤 + 목성 안타르다샤',#}
+{#                advice: '참조적인 활동과 인간관계에 유의한 시기입니다. 예술적 노력과 의미 있는 관계 구축에 집중하세요.',#}
+{#            },#}
+{#            // Placeholder for detailed chart analysis content#}
+{#            detailedAnalysis: {#}
+{#                'D9': {#}
+{#                    title: 'D9 나밤사 차트 (Navamsa Chart)',#}
+{#                    intro: '결혼, 배우자, 영적 성장에 대한 심층 분석',#}
+{#                    chartImage: 'https://placehold.co/300x200/555/FFF?text=Navamsa+Chart', // Specific image for D9#}
+{#                    coreInfo: {#}
+{#                        lagna: '사수자리 (Sagittarius)',#}
+{#                        house7Lord: '벵골어',#}
+{#                        venusPosition: '5하우스 앙카라'#}
+{#                    },#}
+{#                    strengths: [#}
+{#                        '강한 정신적 유대감',#}
+{#                        '서로를 존중하는 관계',#}
+{#                        '철학적 대화를 즐기는 파트너십'#}
+{#                    ],#}
+{#                    warnings: [#}
+{#                        '과도한 독립주의 경향',#}
+{#                        '감정적 문제에 대한 이해 부족',#}
+{#                        '약속과 책임감에 대한 가벼운 태도'#}
+{#                    ],#}
+{#                    aiAnalysis: {#}
+{#                        intro: '홍길동님의 나밤사 차트 분석 결과, 결혼 생활에서 다음과 같은 특징을 보입니다:',#}
+{#                        sections: [#}
+{#                            { title: '배우자의 특징', content: '당신의 배우자는 지적이고 모험적인 성향을 가진 사랑할 가능성이 높습니다. 사수자리 라그나의 영향으로 철학적 사고를 즐기며, 여행과 새로운 경험을 좋아하는 파트너와 인연이 있습니다. 특히 교육, 출판, 종교 분야와 관련된 직업을 가진 사람과의 만남이 예상됩니다.' },#}
+{#                            { title: '결혼 시기와 운명', content: '금성이 5하우스에 위치하여 사랑과 결혼운이 강하게 나타납니다. 25-30세 사이에 운명적인 만남이 있을 것으로 보이며, 적극적이고 열정적인 사람으로 시작될 가능성이 높습니다. 다만 성급한 결정보다는 충분한 시간을 두고 신중함을 찾아가는 것이 중요합니다.' },#}
+{#                            { title: '부부 관계의 역학', content: '당신은 관계에서 열정을 주는 역할을 하며, 파트너에게 새로운 관점과 가능성을 제시하는 사람입니다. 7하우스 지배자가 벵골어에 있어 의사소통의 관계적 특성이 될 것입니다. 서로 다른 문제에 대해 깊이 있는 대화와 나누며 정신적으로 성장하는 관계를 만들 것입니다.' },#}
+{#                            { title: '성장과 깨달음', content: '가장 건설적인 관계는 개인적인 발전에서 차이를 보일 수 있습니다. 당신의 이상주의적 성향과 파트너의 실용적 접근이 충돌할 때가 있을 것입니다. 이때는 서로의 관점을 존중하고, 유연한 자세를 찾아가는 노력이 필요합니다.' },#}
+{#                            { title: '영적 성장', content: '나밤사 차트는 영혼의 진화를 보여주는 차트이기도 합니다. 당신의 차트는 이번 생에서 관계를 통한 영적 성장이 주요 테마임을 나타냅니다. 결혼 생활을 통해 자아를 발견하고, 더 높은 의식 수준에 도달하게 될 것입니다.' },#}
+{#                            { title: '카르마적 의미', content: '이 차트는 당신의 영혼이 과거 생에서 관계를 통해 배우지 못한 교훈을 배우고 성장하기 위해 이번 생에 태어났음을 나타냅니다. 특히 결혼을 통해 인내심, 이해심, 그리고 타협의 중요성을 배우게 될 것입니다.' }#}
+{#                        ]#}
+{#                    }#}
+{#                },#}
+{#                'D1': {#}
+{#                    title: 'D1 - 라시 차트 (Rashi Chart)',#}
+{#                    intro: '전반적인 성격과 운명에 대한 심층 분석입니다. 이 차트는 개인의 기본적인 성향과 삶의 주요 흐름을 나타냅니다.',#}
+{#                    chartImage: 'https://placehold.co/300x200/555/FFF?text=Rashi+Chart',#}
+{#                    coreInfo: { lagna: '양자리 (Aries)', house7Lord: '금성', venusPosition: '4하우스 물고기자리' },#}
+{#                    strengths: ['강한 리더십', '독립적인 성향', '새로운 도전을 즐김'],#}
+{#                    warnings: ['충동적인 결정', '인내심 부족', '고집이 강함'],#}
+{#                    aiAnalysis: {#}
+{#                        intro: '홍길동님의 라시 차트 분석 결과, 다음과 같은 특징을 보입니다:',#}
+{#                        sections: [#}
+{#                            { title: '성격 특징', content: '당신은 타고난 리더이며, 새로운 아이디어를 추구하고 실행하는 데 능숙합니다. 독립적이고 용감하며, 도전을 두려워하지 않습니다.' },#}
+{#                            { title: '직업 및 경력', content: '혁신적인 분야나 리더십을 발휘할 수 있는 직업이 적합합니다. 기업가, 관리자, 군인 등에서 성공할 가능성이 높습니다.' }#}
+{#                        ]#}
+{#                    }#}
+{#                },#}
+{#                'D10': {#}
+{#                    title: 'D10 - 다상사 차트 (Dasamsa Chart)',#}
+{#                    intro: '직업, 경력, 사회적 지위에 대한 심층 분석입니다. 이 차트는 당신의 직업적 성공과 명성을 나타냅니다.',#}
+{#                    chartImage: 'https://placehold.co/300x200/555/FFF?text=Dasamsa+Chart',#}
+{#                    coreInfo: { lagna: '염소자리 (Capricorn)', house7Lord: '달', venusPosition: '10하우스 천칭자리' },#}
+{#                    strengths: ['강한 직업 윤리', '체계적인 접근 방식', '목표 달성 능력'],#}
+{#                    warnings: ['과도한 업무 스트레스', '유연성 부족', '워커홀릭 경향'],#}
+{#                    aiAnalysis: {#}
+{#                        intro: '홍길동님의 다상사 차트 분석 결과, 직업 생활에서 다음과 같은 특징을 보입니다:',#}
+{#                        sections: [#}
+{#                            { title: '직업적 성공', content: '당신은 매우 근면하고 책임감이 강하여 어떤 직업에서든 성공할 잠재력이 있습니다. 특히 관리, 금융, 공공 서비스 분야에서 두각을 나타낼 수 있습니다.' },#}
+{#                            { title: '사회적 지위', content: '사회적으로 높은 지위에 오를 가능성이 있으며, 명성과 존경을 얻을 수 있습니다. 당신의 노력과 헌신은 주변 사람들에게 인정받을 것입니다.' }#}
+{#                        ]#}
+{#                    }#}
+{#                },#}
+{#                'D2': {#}
+{#                    title: 'D2 - 호라 차트 (Hora Chart)',#}
+{#                    intro: '재산과 부에 대한 심층 분석입니다. 이 차트는 개인의 재정적 안정성과 부의 축적 능력을 나타냅니다.',#}
+{#                    chartImage: 'https://placehold.co/300x200/555/FFF?text=Hora+Chart',#}
+{#                    coreInfo: { lagna: '황소자리 (Taurus)', house7Lord: '화성', venusPosition: '2하우스 쌍둥이자리' },#}
+{#                    strengths: ['안정적인 재정 관리', '투자 능력', '부의 축적 잠재력'],#}
+{#                    warnings: ['과도한 지출 경향', '재정적 위험 회피', '변동성 있는 수입'],#}
+{#                    aiAnalysis: {#}
+{#                        intro: '홍길동님의 호라 차트 분석 결과, 재산과 부에 있어 다음과 같은 특징을 보입니다:',#}
+{#                        sections: [#}
+{#                            { title: '재정적 안정', content: '당신은 재정적으로 안정된 삶을 추구하며, 돈을 현명하게 관리하는 능력이 있습니다. 꾸준한 노력으로 부를 축적할 수 있습니다.' },#}
+{#                            { title: '투자 전략', content: '장기적인 관점에서 안정적인 투자를 선호합니다. 부동산이나 가치주에 투자하는 것이 유리할 수 있습니다.' }#}
+{#                        ]#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        };#}
+{##}
+{#        /**#}
+{#         * Function to create a chart card HTML string.#}
+{#         * @param {Object} chart - The chart data object.#}
+{#         * @param {boolean} isSmall - Whether the card should be small.#}
+{#         * @returns {string} The HTML string for the chart card.#}
+{#         */#}
+{#        function createChartCard(chart, isSmall = false) {#}
+{#            const heightClass = isSmall ? 'h-48' : 'h-56';#}
+{#            // Add data-chart-id and data-chart-title attributes for easy identification when clicked#}
+{#            return `#}
+{#                <div class="bg-gray-700 p-6 rounded-xl shadow-md flex flex-col justify-between ${heightClass} cursor-pointer chart-card" data-chart-id="${chart.id}" data-chart-title="${chart.title}">#}
+{#                    <div class="flex justify-between items-center mb-3">#}
+{#                        <h4 class="text-lg font-semibold text-gray-200">${chart.title}</h4>#}
+{#                        <span class="text-gray-400 text-xl">›</span>#}
+{#                    </div>#}
+{#                    <div class="flex-grow flex items-center justify-center bg-gray-600 rounded-lg p-4 text-gray-400 text-center text-sm">#}
+{#                        차트 시각화 영역#}
+{#                    </div>#}
+{#                    ${chart.description ? `<p class="mt-3 text-gray-400 text-sm">${chart.description}</p>` : ''}#}
+{#                </div>#}
+{#            `;#}
+{#        }#}
+{##}
+{#        /**#}
+{#         * Function to render all chart cards into their respective containers.#}
+{#         */#}
+{#        function renderChartCards() {#}
+{#            // Render main charts#}
+{#            mainChartsContainer.innerHTML = chartData.mainCharts.map(chart => createChartCard(chart)).join('');#}
+{##}
+{#            // Render auxiliary charts#}
+{#            auxiliaryChartsContainer.innerHTML = chartData.auxiliaryCharts.map(chart => createChartCard(chart, true)).join('');#}
+{##}
+{#            // Update today's info#}
+{#            todayInfoTime.textContent = chartData.todayInfo.time;#}
+{#            todayInfoDescription.textContent = chartData.todayInfo.description;#}
+{#            todayInfoAdvice.textContent = chartData.todayInfo.advice;#}
+{##}
+{#            // Add event listeners to newly rendered chart cards#}
+{#            document.querySelectorAll('.chart-card').forEach(card => {#}
+{#                card.addEventListener('click', (event) => {#}
+{#                    const chartId = event.currentTarget.dataset.chartId;#}
+{#                    const chartTitle = event.currentTarget.dataset.chartTitle; // Get chart title#}
+{#                    goToDetailPage(chartId, chartTitle); // Pass chart title#}
+{#                });#}
+{#            });#}
+{#        }#}
+{##}
+{#        /**#}
+{#         * Switches to the chart display page.#}
+{#         * @param {Object} data - User information to display.#}
+{#         */#}
+{#        function goToChartPage(data) {#}
+{#            userInfo = data; // Store user info globally#}
+{#            inputPage.classList.add('hidden-section'); // Hide input page#}
+{#            detailPage.classList.add('hidden-section'); // Hide detail page#}
+{#            chartPage.classList.remove('hidden-section'); // Show chart page#}
+{##}
+{#            // Update user info summary#}
+{#            userNameDisplay.textContent = `${userInfo.name}의 차트`;#}
+{#            userInitialDisplay.textContent = userInfo.name.charAt(0);#}
+{#            summaryName.textContent = userInfo.name;#}
+{#            summaryBirthDate.textContent = userInfo.birthDate;#}
+{#            summaryBirthTime.textContent = userInfo.birthTime;#}
+{#            summaryBirthPlace.textContent = userInfo.birthPlace;#}
+{##}
+{#            // Show loading spinner#}
+{#            loadingSpinner.classList.remove('hidden-section');#}
+{#            chartContent.classList.add('hidden-section');#}
+{##}
+{#            // Simulate API call or data generation delay#}
+{#            setTimeout(() => {#}
+{#                loadingSpinner.classList.add('hidden-section'); // Hide loading spinner#}
+{#                chartContent.classList.remove('hidden-section'); // Show chart content#}
+{#                renderChartCards(); // Render the chart cards#}
+{#            }, 2000); // 2 second delay#}
+{#        }#}
+{##}
+{#        /**#}
+{#         * Switches back to the input form page.#}
+{#         */#}
+{#        function goToInputPage() {#}
+{#            chartPage.classList.add('hidden-section'); // Hide chart page#}
+{#            detailPage.classList.add('hidden-section'); // Hide detail page#}
+{#            inputPage.classList.remove('hidden-section'); // Show input page#}
+{#            // Optionally clear input fields here#}
+{#            nameInput.value = '';#}
+{#            birthDateInput.value = '';#}
+{#            birthTimeInput.value = '';#}
+{#            birthPlaceInput.value = '';#}
+{#        }#}
+{##}
+{#        /**#}
+{#         * Switches to the detail analysis page for a specific chart.#}
+{#         * @param {string} chartId - The ID of the chart to display details for.#}
+{#         * @param {string} chartTitle - The title of the chart to display.#}
+{#         */#}
+{#        function goToDetailPage(chartId, chartTitle) {#}
+{#            chartPage.classList.add('hidden-section'); // Hide chart page#}
+{#            inputPage.classList.add('hidden-section'); // Hide input page#}
+{#            detailPage.classList.remove('hidden-section'); // Show detail page#}
+{##}
+{#            // Populate detail page with content based on chartId#}
+{#            const detailContent = chartData.detailedAnalysis[chartId];#}
+{##}
+{#            // Always set the title#}
+{#            detailChartTitle.textContent = chartTitle;#}
+{##}
+{#            if (detailContent) {#}
+{#                detailIntroText.textContent = detailContent.intro;#}
+{#                detailChartImage.src = detailContent.chartImage;#}
+{##}
+{#                if (lagnaInfo) lagnaInfo.textContent = detailContent.coreInfo.lagna;#}
+{#                if (house7Info) house7Info.textContent = detailContent.coreInfo.house7Lord;#}
+{#                if (venusInfo) venusInfo.textContent = detailContent.coreInfo.venusPosition;#}
+{##}
+{#                if (strengthsContainerDetail) {#}
+{#                    strengthsContainerDetail.innerHTML = '';#}
+{#                    detailContent.strengths.forEach(strength => {#}
+{#                        strengthsContainerDetail.innerHTML += `<p class="flex items-center text-green-400"><span class="mr-2">✔</span> ${strength}</p>`;#}
+{#                    });#}
+{#                }#}
+{##}
+{#                if (warningsContainerDetail) {#}
+{#                    warningsContainerDetail.innerHTML = '';#}
+{#                    detailContent.warnings.forEach(warning => {#}
+{#                        warningsContainerDetail.innerHTML += `<p class="flex items-center text-red-400"><span class="mr-2">▲</span> ${warning}</p>`;#}
+{#                    });#}
+{#                }#}
+{##}
+{#                if (aiAnalysisIntro) aiAnalysisIntro.textContent = detailContent.aiAnalysis.intro;#}
+{#                if (aiAnalysisContent) {#}
+{#                    aiAnalysisContent.innerHTML = '';#}
+{#                    detailContent.aiAnalysis.sections.forEach(section => {#}
+{#                        aiAnalysisContent.innerHTML += `#}
+{#                            <div>#}
+{#                                <h4 class="font-bold mb-1">**${section.title}**</h4>#}
+{#                                <p class="text-sm">${section.content}</p>#}
+{#                            </div>#}
+{#                        `;#}
+{#                    });#}
+{#                }#}
+{##}
+{#            } else {#}
+{#                // Handle case where detail content for chartId is not found#}
+{#                detailIntroText.textContent = `"${chartTitle}"에 대한 상세 분석은 현재 준비 중입니다.`;#}
+{#                detailChartImage.src = `https://placehold.co/300x200/555/FFF?text=${chartId}+Chart`; // Generic placeholder#}
+{##}
+{#                if (lagnaInfo) lagnaInfo.textContent = '정보 없음';#}
+{#                if (house7Info) house7Info.textContent = '정보 없음';#}
+{#                if (venusInfo) venusInfo.textContent = '정보 없음';#}
+{##}
+{#                if (strengthsContainerDetail) strengthsContainerDetail.innerHTML = '<p class="text-gray-400 text-sm">준비 중입니다.</p>';#}
+{#                if (warningsContainerDetail) warningsContainerDetail.innerHTML = '<p class="text-gray-400 text-sm">준비 중입니다.</p>';#}
+{##}
+{#                if (aiAnalysisIntro) aiAnalysisIntro.textContent = '이 차트에 대한 AI 맞춤 해석은 현재 준비 중입니다.';#}
+{#                if (aiAnalysisContent) aiAnalysisContent.innerHTML = '<p class="text-gray-400 text-sm">더 자세한 내용은 곧 제공될 예정입니다.</p>';#}
+{#            }#}
+{#        }#}
+{##}
+{#        // Function to go back to the chart page from the detail page#}
+{#        function goToChartPageFromDetail() {#}
+{#            goToChartPage(userInfo); // Re-use goToChartPage to show chart list with current user info#}
+{#        }#}
+{##}
+{##}
+{#        // Event Listeners#}
+{#        generateChartBtn.addEventListener('click', () => {#}
+{#            const name = nameInput.value;#}
+{#            const birthDate = birthDateInput.value;#}
+{#            const birthTime = birthTimeInput.value;#}
+{#            const birthPlace = birthPlaceInput.value;#}
+{##}
+{#            // Simple validation#}
+{#            if (!name || !birthDate || !birthTime || !birthPlace) {#}
+{#                // Using a custom modal or alert for user feedback#}
+{#                // For this example, we'll use a simple alert as a placeholder.#}
+{#                // In a real app, replace with a custom modal UI.#}
+{#                alert('모든 정보를 입력해주세요.');#}
+{#                return;#}
+{#            }#}
+{#            goToChartPage({ name, birthDate, birthTime, birthPlace });#}
+{#        });#}
+{##}
+{#        newChartBtn.addEventListener('click', goToInputPage);#}
+{##}
+{#        // Initial rendering (optional, can be called after page load)#}
+{#        // renderChartCards(); // This will be called by goToChartPage after loading#}
+{##}
+{#    </script>#}
+
+

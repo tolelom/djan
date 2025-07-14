@@ -41,3 +41,5 @@ def result_view(request):
         }
         return render(request, 'saju/result.html', context)
     return redirect('saju:input')
+
+
