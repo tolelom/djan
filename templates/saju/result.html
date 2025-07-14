@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>바르가 차트 해석</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-900 text-white min-h-screen p-4 flex flex-col items-center">
+  <header class="w-full max-w-4xl text-center mb-8">
+    <h1 class="text-4xl font-bold text-yellow-400">⭐ 바르가 차트 해석</h1>
+    <p class="text-gray-300 mt-2">{{ name }}님의 차트 결과</p>
+  </header>
+
+  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
+    <h2 class="text-xl font-semibold text-gray-200 mb-4">출생 정보</h2>
+    <p>👤 이름: {{ name }}</p>
+    <p>📅 생년월일: {{ birth_date }}</p>
+    <p>⏰ 출생 시간: {{ birth_time }}</p>
+    <p>📍 출생지: {{ birth_place }}</p>
+  </section>
+
+  <section class="w-full max-w-4xl mb-8">
+    <h2 class="text-2xl font-semibold text-gray-200 mb-4">주요 차트</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for chart in main_charts %}
+        <div class="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col">
+          <h3 class="text-lg font-semibold text-gray-100">{{ chart.title }}</h3>
+          <div class="flex-grow flex items-center justify-center bg-gray-600 rounded my-3 text-gray-400">차트 영역</div>
+          <p class="text-gray-400">{{ chart.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="w-full max-w-4xl mb-8">
+    <h3 class="text-xl font-semibold text-gray-200 mb-4">보조 차트</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {% for chart in aux_charts %}
+        <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+          <h4 class="font-medium text-gray-100">{{ chart.title }}</h4>
+          <div class="h-32 bg-gray-600 rounded my-3 text-gray-400 flex items-center justify-center">차트 영역</div>
+          <p class="text-gray-400 text-sm">{{ chart.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-gray-700 p-6 rounded-xl shadow-inner mb-8 w-full max-w-2xl">
+    <h2 class="text-xl font-semibold text-gray-200 mb-3 flex items-center">
+      <span class="text-yellow-400 mr-2">⭐</span> 오늘의 운세 및 통찰
+    </h2>
+    <p>{{ today_info.time }}: {{ today_info.description }}</p>
+    <p class="text-gray-400 mt-2">{{ today_info.advice }}</p>
+  </section>
+
+  <a href="{% url 'saju:input' %}" class="w-full max-w-2xl py-3 bg-yellow-500 text-gray-900 font-bold rounded-xl text-center hover:bg-yellow-400 transition">새로 생성하기</a>
+</body>
+</html>

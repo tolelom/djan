@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바르가 차트 생성기 (Gemini API)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        /* 차트 스타일 (북인도 스타일로 변경) */
+        .chart-container {
+            width: 350px;
+            height: 350px;
+            position: relative;
+            border: 2px solid #a0522d; /* 앤틱한 느낌의 테두리 */
+            background-color: #fdfaf2; /* 종이 질감 배경 */
+        }
+
+        .house {
+            position: absolute;
+            z-index: 1; /* SVG 위에 내용이 오도록 설정 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translate(-50%, -50%);
+            padding: 4px;
+            width: 25%; /* 각 영역의 너비를 지정하여 겹침 방지 */
+            height: 25%;
+        }
+
+        .house-content {
+            text-align: center;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            color: #2d3748;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 북인도 차트 레이아웃에 맞춘 하우스 위치 (반시계 방향) */
+        #house-1 { top: 25%; left: 50%; }   /* 상단 중앙 */
+        #house-2 { top: 12.5%; left: 12.5%; } /* 좌측 상단 */
+        #house-3 { top: 50%; left: 25%; }   /* 좌측 중앙 */
+        #house-4 { top: 87.5%; left: 12.5%; } /* 좌측 하단 */
+        #house-5 { top: 75%; left: 50%; }   /* 하단 중앙 */
+        #house-6 { top: 87.5%; left: 87.5%; } /* 우측 하단 */
+        #house-7 { top: 50%; left: 75%; }   /* 우측 중앙 */
+        #house-8 { top: 12.5%; left: 87.5%; } /* 우측 상단 */
+        #house-9 { top: 37.5%; left: 62.5%; }  /* 내부 우측 상단 */
+        #house-10 { top: 62.5%; left: 62.5%; } /* 내부 우측 하단 */
+        #house-11 { top: 62.5%; left: 37.5%; } /* 내부 좌측 하단 */
+        #house-12 { top: 37.5%; left: 37.5%; } /* 내부 좌측 상단 */
+
+
+        .planet {
+            font-weight: 500;
+            margin: 0 2px;
+        }
+
+        /* 로딩 스피너 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-2xl mx-auto p-4 md:p-8">
+
+        <div id="form-section" class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">바르가 차트 생성기 (Gemini)</h1>
+                <p class="text-gray-500 mt-2">출생 정보를 입력하여 당신의 바르가 차트를 확인해보세요.</p>
+            </div>
+
+            <form id="birth-chart-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="이름을 입력하세요" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <select id="year" name="year" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required></select>
+                            <select id="month" name="month" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required></select>
+                            <select id="day" name="day" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required></select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">출생시간</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="hour" name="hour" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required></select>
+                            <select id="minute" name="minute" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" required></select>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="place" class="block text-sm font-medium text-gray-700 mb-1">출생 장소</label>
+                        <input type="text" id="place" name="place" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="예: 서울, 대한민국" required>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <button type="submit" id="submit-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-transform transform hover:scale-105 flex items-center justify-center">
+                        <span id="submit-button-text">생성하기</span>
+                        <div id="loader" class="loader hidden"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="result-section" class="hidden bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div class="text-center mb-6">
+                <h2 id="result-name" class="text-2xl md:text-3xl font-bold text-gray-800"></h2>
+                <p id="result-info" class="text-gray-500 mt-2"></p>
+            </div>
+
+            <div class="flex flex-col items-center justify-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">바르가 차트 (Varga Chart)</h3>
+                <div class="chart-container">
+                    <!-- SVG for North Indian Chart Lines -->
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; top: 0; left: 0; z-index: 0;">
+                       <path d="M 0 0 L 100 100 M 100 0 L 0 100 M 50 0 L 100 50 L 50 100 L 0 50 Z" stroke="#e53e3e" stroke-width="0.7" fill="none"/>
+                    </svg>
+                    <!-- House Content Placeholders -->
+                    <div id="house-1" class="house"><div class="house-content"></div></div>
+                    <div id="house-2" class="house"><div class="house-content"></div></div>
+                    <div id="house-3" class="house"><div class="house-content"></div></div>
+                    <div id="house-4" class="house"><div class="house-content"></div></div>
+                    <div id="house-5" class="house"><div class="house-content"></div></div>
+                    <div id="house-6" class="house"><div class="house-content"></div></div>
+                    <div id="house-7" class="house"><div class="house-content"></div></div>
+                    <div id="house-8" class="house"><div class="house-content"></div></div>
+                    <div id="house-9" class="house"><div class="house-content"></div></div>
+                    <div id="house-10" class="house"><div class="house-content"></div></div>
+                    <div id="house-11" class="house"><div class="house-content"></div></div>
+                    <div id="house-12" class="house"><div class="house-content"></div></div>
+                </div>
+            </div>
+            <div id="error-message" class="text-center text-red-500 font-semibold my-4 hidden"></div>
+            <div class="text-center text-sm text-gray-500 mt-6 px-4">
+                <p>※ 이 차트는 Gemini API를 통해 생성된 점성술 데이터 예시이며, 오락적인 목적으로만 사용해야 합니다. 실제 전문가의 조언을 대체할 수 없습니다.</p>
+            </div>
+            <div class="mt-8">
+                <button id="reset-button" class="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-50 transition">
+                    다시 생성하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- 날짜 및 시간 옵션 생성 ---
+            const yearSelect = document.getElementById('year');
+            const monthSelect = document.getElementById('month');
+            const daySelect = document.getElementById('day');
+            const hourSelect = document.getElementById('hour');
+            const minuteSelect = document.getElementById('minute');
+
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1940; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '년';
+                yearSelect.appendChild(option);
+            }
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '월';
+                monthSelect.appendChild(option);
+            }
+            function populateDays(year, month) {
+                const dayCount = new Date(year, month, 0).getDate();
+                daySelect.innerHTML = '';
+                for (let i = 1; i <= dayCount; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i + '일';
+                    daySelect.appendChild(option);
+                }
+            }
+            yearSelect.addEventListener('change', () => populateDays(yearSelect.value, monthSelect.value));
+            monthSelect.addEventListener('change', () => populateDays(yearSelect.value, monthSelect.value));
+            populateDays(currentYear, 1);
+
+            for (let i = 0; i < 24; i++) {
+                const option = document.createElement('option');
+                const value = i.toString().padStart(2, '0');
+                option.value = value;
+                option.textContent = value + '시';
+                hourSelect.appendChild(option);
+            }
+            for (let i = 0; i < 60; i++) {
+                const option = document.createElement('option');
+                const value = i.toString().padStart(2, '0');
+                option.value = value;
+                option.textContent = value + '분';
+                minuteSelect.appendChild(option);
+            }
+
+            // --- 폼 및 결과 섹션 요소 ---
+            const formSection = document.getElementById('form-section');
+            const resultSection = document.getElementById('result-section');
+            const form = document.getElementById('birth-chart-form');
+            const resetButton = document.getElementById('reset-button');
+            const submitButton = document.getElementById('submit-button');
+            const submitButtonText = document.getElementById('submit-button-text');
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('error-message');
+
+            // --- 폼 제출 이벤트 리스너 ---
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // 로딩 상태 시작
+                submitButton.disabled = true;
+                submitButtonText.textContent = '생성 중...';
+                loader.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+
+                const name = document.getElementById('name').value;
+                const year = document.getElementById('year').value;
+                const month = document.getElementById('month').value;
+                const day = document.getElementById('day').value;
+                const hour = document.getElementById('hour').value;
+                const minute = document.getElementById('minute').value;
+                const place = document.getElementById('place').value;
+
+                try {
+                    // Gemini API를 호출하여 차트 데이터 생성
+                    const chartData = await generateVargaChartFromAPI(year, month, day, hour, minute, place);
+
+                    // 결과 화면에 정보 표시
+                    document.getElementById('result-name').textContent = `${name}님의 차트`;
+                    document.getElementById('result-info').textContent = `${year}년 ${month}월 ${day}일, ${hour}:${minute}, ${place}`;
+
+                    // 차트 그리기
+                    drawChart(chartData);
+
+                    // 화면 전환
+                    formSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Error generating chart:', error);
+                    errorMessage.textContent = '차트 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+                    errorMessage.classList.remove('hidden');
+                } finally {
+                    // 로딩 상태 종료
+                    submitButton.disabled = false;
+                    submitButtonText.textContent = '생성하기';
+                    loader.classList.add('hidden');
+                }
+            });
+
+            resetButton.addEventListener('click', function() {
+                formSection.classList.remove('hidden');
+                resultSection.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                form.reset();
+                populateDays(currentYear, 1);
+            });
+
+            // --- Gemini API 호출 함수 ---
+            async function generateVargaChartFromAPI(year, month, day, hour, minute, place) {
+                const prompt = `
+                    You are an expert Vedic astrologer. Based on the following birth details, generate a North Indian style Varga Chart (specifically the D1 Rasi chart).
+                    - Birth Date: ${year}-${month}-${day}
+                    - Birth Time: ${hour}:${minute}
+                    - Birth Place: ${place}
+
+                    Provide the positions of the planets (As, Su, Mo, Me, Ve, Ma, Ju, Sa, Ra, Ke) in the 12 houses. The 1st house is the top rhombus, and the houses proceed counter-clockwise.
+
+                    Return the result ONLY as a JSON array. Each element in the array must be an object with two keys: "house" (a number from 1 to 12) and "planets" (an array of strings with the planet abbreviations).
+                    Ensure all 12 houses are present in the array, even if a house contains no planets (in which case the "planets" array will be empty).
+                    Example format: [{"house": 1, "planets": ["As", "Su"]}, {"house": 2, "planets": []}, ...]
+                `;
+
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "house": { "type": "NUMBER" },
+                                    "planets": {
+                                        "type": "ARRAY",
+                                        "items": { "type": "STRING" }
+                                    }
+                                },
+                                required: ["house", "planets"]
+                            }
+                        }
+                    }
+                };
+
+                const apiKey = "AIzaSyC5QmSWe7zrDGx6ZTwfNbFR4ceaI01JdjM"; // API 키는 비워 둡니다. api 키 보안 이슈
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    return JSON.parse(jsonText);
+                } else {
+                    console.error("Unexpected API response structure:", result);
+                    throw new Error('Failed to parse chart data from API response.');
+                }
+            }
+
+            // --- 차트를 그리는 함수 ---
+            function drawChart(chartData) {
+                // 기존 차트 초기화
+                for(let i = 1; i <= 12; i++) {
+                    document.querySelector(`#house-${i} .house-content`).innerHTML = '';
+                }
+
+                // API로부터 받은 데이터로 차트 채우기
+                if (Array.isArray(chartData)) {
+                    chartData.forEach(item => {
+                        const houseNumber = item.house;
+                        const planets = item.planets;
+                        if (houseNumber >= 1 && houseNumber <= 12) {
+                            const houseElement = document.querySelector(`#house-${houseNumber} .house-content`);
+                            if (houseElement && Array.isArray(planets)) {
+                                houseElement.innerHTML = planets.map(p => `<span class="planet">${p}</span>`).join(' ');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
